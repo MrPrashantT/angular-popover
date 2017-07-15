@@ -17,33 +17,37 @@
                 $scope.popoverClass = attrs.popoverClass;
                 $scope.dropDirection = attrs.direction || 'bottom';
                 var left, top;
-                var trigger = document.querySelector('#'+$scope.trigger);
+                var triggers = document.querySelectorAll('#'+$scope.trigger);
                 var target = document.querySelector('.ng-popover[trigger="'+$scope.trigger+'"]');
 
-                // Add click event listener to trigger
-                trigger.addEventListener('click', function(ev){
-                    var left, top;
-                    var trigger = this; //get trigger element 
-                    var target =  document.querySelector('.ng-popover[trigger="'+$scope.trigger+'"]'); //get triger's target popover
-                    ev.preventDefault();
-                    calcPopoverPosition(trigger, target); //calculate the position of the popover
-                   hideAllPopovers(trigger);
-                    target.classList.toggle('hide'); //toggle display of target popover
-                    // if target popover is visible then add click listener to body and call the open popover callback
-                    if(!target.classList.contains('hide')){
-                        ctrl.registerBodyListener();
-                        $scope.onOpen();
-                        $scope.$apply();
-                    }
-                    //else remove click listener from body and call close popover callback
-                    else{
-                        ctrl.unregisterBodyListener();
-                        $scope.onClose();
-                        $scope.$apply();
-                    }
-                });
+                triggers.forEach(function(trigger) {
+                    // Add click event listener to trigger
+                    trigger.addEventListener('click', function(ev){
+                        var left, top;
+                        var trigger = this; //get trigger element 
+                        var target =  document.querySelector('.ng-popover[trigger="'+$scope.trigger+'"]'); //get triger's target popover
+                        ev.preventDefault();
+                        calcPopoverPosition(trigger, target); //calculate the position of the popover
+                        hideAllPopovers(trigger);
+                        target.classList.toggle('hide'); //toggle display of target popover
+                        // if target popover is visible then add click listener to body and call the open popover callback
+                        if(!target.classList.contains('hide')){
+                            ctrl.registerBodyListener();
+                            $scope.onOpen();
+                            $scope.$apply();
+                        }
+                        //else remove click listener from body and call close popover callback
+                        else{
+                            ctrl.unregisterBodyListener();
+                            $scope.onClose();
+                            $scope.$apply();
+                        }
+                    });
+                }, this);
 
-                var getTriggerOffset = function(){
+                
+
+                var getTriggerOffset = function(trigger){
                     var triggerRect = trigger.getBoundingClientRect();
                     var bodyRect = document.body.getBoundingClientRect();
                     return {
@@ -62,33 +66,33 @@
                     var triggerHeight = trigger.offsetHeight;
                     switch($scope.dropDirection){
                         case 'left': {
-                            left = getTriggerOffset().left - targetWidth - 10 + 'px';
-                            top = getTriggerOffset().top + 'px';
+                            left = getTriggerOffset(trigger).left - targetWidth - 10 + 'px';
+                            top = getTriggerOffset(trigger).top + 'px';
                             break;
                         }
 
                         case 'right':{
-                            left = getTriggerOffset().left + triggerWidth + 10 + 'px';
-                            top = getTriggerOffset().top + 'px';
+                            left = getTriggerOffset(trigger).left + triggerWidth + 10 + 'px';
+                            top = getTriggerOffset(trigger).top + 'px';
                             break;
                         } 
 
                         case'top':{
-                            left = getTriggerOffset().left + 'px';
-                            top = getTriggerOffset().top - targetHeight - 10 + 'px';
+                            left = getTriggerOffset(trigger).left + 'px';
+                            top = getTriggerOffset(trigger).top - targetHeight - 10 + 'px';
                             break;
                         }
 
                         default:{
-                            left = getTriggerOffset().left +'px';
-                            top = getTriggerOffset().top + triggerHeight + 10 + 'px'
+                            left = getTriggerOffset(trigger).left +'px';
+                            top = getTriggerOffset(trigger).top + triggerHeight + 10 + 'px'
                         }
                     }
                     target.style.position = 'absolute';
                     target.style.left = left;
                     target.style.top = top;
                 }
-                calcPopoverPosition(trigger, target);
+                //calcPopoverPosition(trigger, target);
             },
 
             controller: ['$scope', function($scope){
@@ -119,6 +123,7 @@
             }],
             template: '<div class="ng-popover hide"><div class="ng-popover-wrapper {{dropDirection}}"><div class="ng-popover-content" ng-class="popoverClass"><ng-transclude></ng-transclude></div></div></div>'
         }
+
     });
 
     app.factory('ngPopoverFactory', function(){
